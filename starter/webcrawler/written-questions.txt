@@ -1,5 +1,7 @@
 Written Questions
 
+------------------------------------------------------------------------------------------------------------------------
+
 Q1. Run the web crawler using the configurations located at src/main/config/written_question_1a.json and
     src/main/config/written_question_1b.json. The only difference between these configurations is that one always uses
     the sequential crawler and the other always uses the parallel crawler. Inspect the profile output in
@@ -11,6 +13,12 @@ Q1. Run the web crawler using the configurations located at src/main/config/writ
 
     Why did the parser take more time when run with ParallelWebCrawler?
 
+    Ans: As per our implementation, the `Profiler` captures the total time spent in the method run by all the threads and
+        not individually for each thread. As I am running the code on multi-processor system, in case of `ParallelWebCrawler`,
+        `PageParserImpl#parse` was called multiple times (#Threads = Parallelism) the execution time is summed up for
+        all the threads and same is recorded by `Profiler`
+
+------------------------------------------------------------------------------------------------------------------------
 
 Q2. Your manager ran your crawler on her old personal computer, using the configurations from Q1, and she notices that
     the sequential crawler actually outperforms the parallel crawler. She would like to know why.
@@ -21,6 +29,16 @@ Q2. Your manager ran your crawler on her old personal computer, using the config
     (b) Suggest one scenario in which the parallel web crawler will almost certainly perform better than the sequential
         crawler. Why will it perform better?
 
+    Ans (a): Ideally `SequentialWebCrawler` should never outperform `ParallelWebCrawler` but as our manager is running
+            crawler on her old computer having only one core and `ParallelWebCrawler` needs to spawn threads for crawling
+            which is CPU and memory intensive and having less resources might be the reason for `SequentialWebCrawler`
+            outperforming `ParallelWebCrawler`
+
+    Ans (b): `ParallelWebCrawler` will always outperform ``SequentialWebCrawler` in a multi-processor system
+                as there will be enough resources to spawn multiple threads and crawl the web pages in parallel
+                to improve the performance.
+
+------------------------------------------------------------------------------------------------------------------------
 
 Q3. Analyze your method profiler through the lens of Aspect Oriented Programming, by answering the following questions:
 
@@ -28,6 +46,13 @@ Q3. Analyze your method profiler through the lens of Aspect Oriented Programming
 
     (b) What are the join points of the Profiler in the web crawler program?
 
+    Ans (a): One of the important aspects of productions systems is to analyze the performance of the various methods runs
+            in terms of elapsed time to identify and debug which methods are taking time and need to be optimized. So, I
+            think this is perfectly addressed by the `com.udacity.webcrawler.profiler.Profiler` class
+
+    Ans (b): Invocations of Methods having @Profile annotations
+
+------------------------------------------------------------------------------------------------------------------------
 
 Q4. Identify three (3) different design patterns used in this project, and explain which interfaces, classes, and/or
     libraries use or implement those design patterns.
@@ -35,4 +60,18 @@ Q4. Identify three (3) different design patterns used in this project, and expla
     For each pattern, name one thing about the pattern that you LIKED, and one thing you DISLIKED. If you did not like
     anything, you can name two things you disliked.
 
+    Ans:
+        1. Builder Pattern: Used in `CrawlerConfiguration`, `ParserModule`
+            - :) Provides better control over construction process by allowing to build objects in step-by-step process
+            - :( It does create more code (and could introduce more complexity)
 
+        2. Dynamic Proxy Pattern: Used in `ProfilingMethodInterceptor`, `ProfilerImpl`
+            - :) Allows one single class with one single method to service multiple method calls to arbitrary classes with an arbitrary number of methods
+            - :( Requires good understanding and increases complexity in implementation
+
+        3. Singleton Pattern: Used in `WebCrawlerModule`, `ProfilerModule`
+            - :) Assure only one and same instance of object every time.
+            - :( Makes testing difficult as we can't have multiple instances with varying configurations
+
+
+------------------------------------------------------------------------------------------------------------------------
