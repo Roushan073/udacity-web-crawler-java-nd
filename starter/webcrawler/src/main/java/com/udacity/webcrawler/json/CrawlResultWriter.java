@@ -38,6 +38,7 @@ public final class CrawlResultWriter {
 
     try (BufferedWriter writer = Files.newBufferedWriter(path, StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
       write(writer);
+      writer.write(System.lineSeparator());
     } catch (Exception e) {
       e.printStackTrace();
       throw new Exception("Unable to open Path: " + path.toString());
